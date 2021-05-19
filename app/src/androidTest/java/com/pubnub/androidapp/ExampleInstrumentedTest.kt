@@ -1,6 +1,6 @@
 package com.pubnub.androidapp
 
-import android.support.test.runner.AndroidJUnit4
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.pubnub.api.PNConfiguration
 import com.pubnub.api.PubNub
 import com.pubnub.api.callbacks.SubscribeCallback
@@ -19,12 +19,13 @@ import java.util.*
 @RunWith(AndroidJUnit4::class)
 class ExampleInstrumentedTest {
     private val pubNubToTest: PubNub = PubNub(PNConfiguration().apply {
-        subscribeKey = Keys().provideSubKey()
-        publishKey = Keys().providePubKey()
+        subscribeKey = BuildConfig.PUBNUB_SUB_KEY
+        publishKey = BuildConfig.PUBNUB_PUB_KEY
     })
 
     @Test
     fun useAppContext() {
+
         // Context of the app under test.
         val uuid = UUID.randomUUID()
         val channelName = "channelName-$uuid"

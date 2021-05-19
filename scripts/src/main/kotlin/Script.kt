@@ -1,0 +1,200 @@
+@file:DependsOn("software.amazon.awssdk:devicefarm:2.16.49")
+@file:DependsOn("com.squareup.okhttp3:okhttp:4.9.1")
+@file:DependsOn("org.slf4j:slf4j-simple:1.7.30")
+@file:CompilerOpts("-jvm-target 1.8")
+
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.asRequestBody
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import software.amazon.awssdk.regions.Region
+import software.amazon.awssdk.services.devicefarm.DeviceFarmClient
+import software.amazon.awssdk.services.devicefarm.model.*
+import java.io.File
+import java.time.Duration
+import java.util.*
+import kotlin.system.exitProcess
+
+private val region = Region.US_WEST_2
+
+//private val projectArn = "arn:aws:devicefarm:us-west-2:806583214236:project:689ad938-8bac-40a4-a511-da1afafb3c50"
+//private val devicePoolArn = "arn:aws:devicefarm:us-west-2:806583214236:devicepool:689ad938-8bac-40a4-a511-da1afafb3c50/24745f40-31b0-4ce6-ad0b-4936af61e16f"
+//"../app/build/outputs/apk/debug/app-debug.apk"
+//"../app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk"
+private val client = OkHttpClient()
+private val uniqueName = "e2e-aws-poc-${UUID.randomUUID().toString().take(8)}"
+private val logger: Logger = LoggerFactory.getLogger(Script::class.java)
+
+
+fun wait(
+    interval: Duration = Duration.ofSeconds(3),
+    maxNumberOfIntervals: Int = 20,
+    timeoutBlock: () -> Unit = {},
+    block: () -> Boolean
+) {
+    var currentInterval = 0
+    while (true) {
+        if (block()) {
+            return
+        }
+        currentInterval++
+        if (currentInterval >= maxNumberOfIntervals) {
+            timeoutBlock()
+            logger.error("Timeout. Waited for $currentInterval calls in ${interval.toMillis()} millis intervals")
+            exitProcess(5)
+        }
+        Thread.sleep(interval.toMillis())
+    }
+}
+
+
+fun DeviceFarmClient.confirmUpload(arn: String) {
+    wait {
+        val resp = getUpload { it.arn(arn) }
+        logger.info("Upload $arn status: ${resp.upload().status()}")
+        when (resp.upload().status()) {
+            UploadStatus.INITIALIZED, UploadStatus.PROCESSING -> false
+            UploadStatus.SUCCEEDED -> true
+            null, UploadStatus.FAILED, UploadStatus.UNKNOWN_TO_SDK_VERSION -> {
+                logger.error("Upload $arn failed due to: ${resp.upload().message()}")
+                exitProcess(2)
+            }
+        }
+
+    }
+}
+
+
+fun DeviceFarmClient.waitForTests(arn: String) {
+    wait(
+        interval = Duration.ofSeconds(10),
+        maxNumberOfIntervals = 150,
+        timeoutBlock = { stopRun { it.arn(arn) } }
+    ) {
+        val resp = getRun { it.arn(arn) }
+        logger.info("Tests $arn status: ${resp.run().status()}")
+        when (resp.run().status()) {
+            ExecutionStatus.COMPLETED -> when (resp.run().result()) {
+                ExecutionResult.PASSED -> true
+                ExecutionResult.FAILED, ExecutionResult.ERRORED -> {
+                    logger.error("Run $arn failed due to: ${resp.run().message()}")
+                    exitProcess(7)
+                }
+                else -> {
+                    logger.error("Run $arn have unexpected ExecutionResult: ${resp.run().result()}")
+                    exitProcess(8)
+                }
+            }
+            null, ExecutionStatus.UNKNOWN_TO_SDK_VERSION -> {
+                logger.error("Run $arn failed due to: ${resp.run().message()}")
+                stopRun { it.arn(arn) }
+                exitProcess(6)
+            }
+            else -> {
+                false
+            }
+        }
+    }
+}
+
+
+fun DeviceFarmClient.upload(name: String, path: String, type: UploadType, projectArn: String): String {
+    logger.info("Creating upload $name")
+    val createUpload = createUpload { b ->
+        b.name(name)
+            .type(type)
+            .contentType("application/octet-stream")
+            .projectArn(projectArn)
+            .build()
+    }
+    val uploadArn = createUpload.upload().arn()
+    val uploadUrl = createUpload.upload().url()
+
+    logger.info("Upload $name created with arn: $uploadArn")
+    logger.info("Uploading $name")
+    client.newCall(
+        Request.Builder()
+            .put(File(path).asRequestBody())
+            .addHeader("content-type", "application/octet-stream")
+            .url(uploadUrl)
+            .build()
+    ).execute().use { uploadResponse ->
+        if (uploadResponse.code != 200) {
+            logger.error("Upload failed ${uploadResponse.code} -> ${uploadResponse.body?.bytes()?.decodeToString()}")
+            exitProcess(1)
+        } else {
+            logger.info("Upload succeeded")
+        }
+    }
+
+    confirmUpload(uploadArn)
+
+    return uploadArn
+}
+
+private fun DeviceFarmClient.runTests(
+    appArn: String,
+    testArn: String,
+    projectArn: String,
+    devicePoolArn: String
+): ScheduleRunResponse? {
+    val result = scheduleRun {
+        it.projectArn(projectArn)
+            .devicePoolArn(devicePoolArn)
+            .appArn(appArn)
+            .name(uniqueName)
+            .test { t ->
+                t.testPackageArn(testArn)
+                    .type(TestType.INSTRUMENTATION)
+                    .build()
+            }.build()
+    }
+    waitForTests(result.run().arn())
+    return result
+}
+
+object Script
+
+fun main(args: Array<String>) {
+    val map: Map<String, String> = args.fold(Pair(emptyMap<String, String>(), "")) { (map, lastKey), elem ->
+        if (elem.startsWith("-"))  Pair(map, elem)
+        else Pair(map + (lastKey to elem), "")
+    }.first
+
+    println(map)
+
+    check(map.keys.containsAll(listOf("--apkPath", "--androidTestApkPath", "--projectArn", "--devicePoolArn")))
+
+    val apkPath: String = map["--apkPath"]!!
+    val androidTestApkPath: String = map["--androidTestApkPath"]!!
+    val projectArn: String = map["--projectArn"]!!
+    val devicePoolArn: String = map["--devicePoolArn"]!!
+
+
+    val deviceFarmClient = DeviceFarmClient.builder()
+        .region(region)
+        .build()
+    val appArn = deviceFarmClient.upload(
+        name = "app-$uniqueName.apk",
+        path = apkPath,
+        type = UploadType.ANDROID_APP,
+        projectArn = projectArn
+    )
+
+    val testArn = deviceFarmClient.upload(
+        name = "androidTest-$uniqueName.apk",
+        path = androidTestApkPath,
+        type = UploadType.INSTRUMENTATION_TEST_PACKAGE,
+        projectArn = projectArn
+    )
+
+    deviceFarmClient.runTests(
+        appArn = appArn,
+        testArn = testArn,
+        projectArn = projectArn,
+        devicePoolArn = devicePoolArn
+    )
+
+}
+
