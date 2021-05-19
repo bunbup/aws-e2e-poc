@@ -23,7 +23,7 @@ jobs:
     - name: Install kscript
       run: source /home/runner/.sdkman/bin/sdkman-init.sh && sdk install kscript
     - name: Create local.properties with keys
-      run: echo "\npubnub.subKey=$PUBNUB_SUB_KEY\npubnub.pubKey=$PUBNUB_PUB_KEY" >> local.properties && cat local.properties
+      run: echo "\npubnub.subKey=${{ secrets.PUBNUB_SUB_KEY }}\npubnub.pubKey=${{ secrets.PUBNUB_PUB_KEY }}" >> local.properties && cat local.properties
     - name: Create aws credentials file
       run: mkdir $HOME/.aws && echo "[default]\naws_access_key_id=$AWS_KEY_ID\naws_secret_access_key=$AWS_SECRET_KEY\n" > $HOME/.aws/credentials
     - name: Build with Gradle
