@@ -30,3 +30,10 @@ jobs:
       run: ./gradlew build packageDebugAndroidTest && ls -la app/build/outputs/apk/androidTest/debug/
     - name: Run tests on aws
       run: source /home/runner/.sdkman/bin/sdkman-init.sh && kscript scripts/src/main/kotlin/Script.kt --apkPath app/build/outputs/apk/debug/app-debug.apk --androidTestApkPath app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk --projectArn arn:aws:devicefarm:us-west-2:806583214236:project:689ad938-8bac-40a4-a511-da1afafb3c50 --devicePoolArn arn:aws:devicefarm:us-west-2:806583214236:devicepool:689ad938-8bac-40a4-a511-da1afafb3c50/24745f40-31b0-4ce6-ad0b-4936af61e16f
+
+    - name: Upload Test Reports Folder
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
+      with:
+        name: reports
+        path: artifacts/
