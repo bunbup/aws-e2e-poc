@@ -12,6 +12,10 @@ import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.devicefarm.DeviceFarmClient
 import software.amazon.awssdk.services.devicefarm.model.*
 import java.io.File
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardOpenOption
+import java.nio.file.attribute.FileAttribute
 import java.time.Duration
 import java.util.*
 import kotlin.system.exitProcess
@@ -76,8 +80,12 @@ fun DeviceFarmClient.waitForTests(arn: String) {
         logger.info("Tests $arn status: ${resp.run().status()}")
         when (resp.run().status()) {
             ExecutionStatus.COMPLETED -> when (resp.run().result()) {
-                ExecutionResult.PASSED -> true
+                ExecutionResult.PASSED -> {
+                    downloadArtifacts(arn)
+                    true
+                }
                 ExecutionResult.FAILED, ExecutionResult.ERRORED -> {
+                    downloadArtifacts(arn)
                     logger.error("Run $arn failed due to: ${resp.run().message()}")
                     exitProcess(7)
                 }
@@ -93,6 +101,30 @@ fun DeviceFarmClient.waitForTests(arn: String) {
             }
             else -> {
                 false
+            }
+        }
+    }
+}
+
+fun DeviceFarmClient.downloadArtifacts(arn: String) {
+    val resp = listJobs { it.arn(arn) }
+    val basePath = Files.createDirectories(Paths.get("./artifacts"))
+    resp.jobs().forEach { job ->
+        listSuites { it.arn(job.arn()) }.suites().forEach { suite ->
+            listTests { it.arn(suite.arn()) }.tests().forEach { test ->
+                listArtifacts { it.arn(test.arn()).type(ArtifactCategory.LOG) }.artifacts().forEach { artifact ->
+                    client.newCall(Request.Builder()
+                        .get()
+                        .url(artifact.url())
+                        .build())
+                        .execute().use {
+                            if (it.code == 200) {
+                                val filePath = Paths.get(basePath.toString(), "${job.name()}-${suite.name()}-${test.name().replace(":", "_")}-${artifact.type()}-${artifact.name()}.${artifact.extension()}")
+                                logger.info("Writing response to $filePath")
+                                Files.write(filePath, it.body!!.bytes(), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
+                            }
+                        }
+                }
             }
         }
     }
@@ -121,7 +153,11 @@ fun DeviceFarmClient.upload(name: String, path: String, type: UploadType, projec
             .build()
     ).execute().use { uploadResponse ->
         if (uploadResponse.code != 200) {
-            logger.error("Upload failed ${uploadResponse.code} -> ${uploadResponse.body?.bytes()?.decodeToString()}")
+            logger.error(
+                "Upload failed ${uploadResponse.code} -> ${
+                    uploadResponse.body?.bytes()?.decodeToString()
+                }"
+            )
             exitProcess(1)
         } else {
             logger.info("Upload succeeded")
@@ -158,7 +194,7 @@ object Script
 
 fun main(args: Array<String>) {
     val map: Map<String, String> = args.fold(Pair(emptyMap<String, String>(), "")) { (map, lastKey), elem ->
-        if (elem.startsWith("-"))  Pair(map, elem)
+        if (elem.startsWith("-")) Pair(map, elem)
         else Pair(map + (lastKey to elem), "")
     }.first
 
@@ -195,6 +231,4 @@ fun main(args: Array<String>) {
         projectArn = projectArn,
         devicePoolArn = devicePoolArn
     )
-
 }
-
