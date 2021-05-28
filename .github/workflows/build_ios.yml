@@ -14,11 +14,11 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install gpg
-      run: brew install gnupg
+      run: brew install gpg
     - name: Setup provisioning profile
       env:
         IOS_KEYS: ${{ secrets.IOS_KEYS }}
-      run: ./scripts/decrypt_secrets.sh
+      run: gpg --version && ./scripts/decrypt_secrets.sh
     - name: Archiving project
       env:
         PR_NUMBER: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
