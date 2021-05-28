@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eo pipefail
 
-gpg --quiet --batch --yes --decrypt --passphrase="$IOS_KEYS" --output ./.github/secrets/cert.p12 ./.github/secrets/cert.p12.gpg
+gpg --quiet --batch --yes --decrypt --passphrase="$GPG_PASS" --output ./.github/secrets/cert.p12 ./.github/secrets/cert.p12.gpg
 
 security create-keychain -p "" build.keychain
 security import ./.github/secrets/cert.p12 -t agg -k ~/Library/Keychains/build.keychain -P "" -A
