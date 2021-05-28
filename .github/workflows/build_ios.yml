@@ -17,7 +17,7 @@ jobs:
       run: brew install gpg
     - name: Setup provisioning profile
       env:
-        IOS_KEYS: ${{ secrets.IOS_KEYS }}
+        GPG_PASS: ${{ secrets.GPG_PASS }}
       run: gpg --version && ./scripts/decrypt_secrets.sh
     - name: Archiving project
       env:
