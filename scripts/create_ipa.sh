@@ -5,7 +5,9 @@ PROJECT=swiftSdkTest
 CURRENT_DIR=`pwd`
 TMPDIR=`mktemp -d /tmp/${PROJECT}.XXX` || exit 1
 ARCHIVE_PATH=$TMPDIR/${PROJECT}.xcarchive
-EXPORT_PATH=$TMPDIR/Payload # DIRECTORY
+EXPORT_PATH=$TMPDIR/Payload
+
+pod install
 xcodebuild -workspace ./${PROJECT}.xcworkspace -allowProvisioningUpdates -scheme ${PROJECT} archive -archivePath $ARCHIVE_PATH -verbose
 mkdir $EXPORT_PATH
 cp -r $ARCHIVE_PATH/Products/Applications/$PROJECT.app $EXPORT_PATH/Payload
