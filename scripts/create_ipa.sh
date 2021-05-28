@@ -1,6 +1,5 @@
 #!/bin/bash
-set -e
-set -o xtrace
+set -eo pipefail
 
 PROJECT=swiftSdkTest
 CURRENT_DIR=`pwd`

@@ -1,0 +1,26 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ master, ios_test ]
+  pull_request:
+    branches: [ master, ios_test ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install gpg
+      run: brew install gnupg
+    - name: Setup provisioning profile
+      env:
+        IOS_KEYS: ${{ secrets.IOS_KEYS }}
+      run: ./scripts/decrypt_secrets.sh
+    - name: Archiving project
+      env:
+        PR_NUMBER: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+      run: cd swiftSdkTest && ../scripts/./create_ipa.sh
+    
