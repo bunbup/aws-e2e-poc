@@ -90,6 +90,7 @@ fun DeviceFarmClient.waitForTests(arn: String) {
                     exitProcess(7)
                 }
                 else -> {
+                    downloadArtifacts(arn)
                     logger.error("Run $arn have unexpected ExecutionResult: ${resp.run().result()}")
                     exitProcess(8)
                 }
@@ -182,7 +183,7 @@ private fun DeviceFarmClient.runTests(
             .name(uniqueName)
             .test { t ->
                 t.testPackageArn(testArn)
-                    .type(TestType.INSTRUMENTATION)
+                    .type(TestType.XCTEST)
                     .build()
             }.build()
     }
@@ -207,21 +208,33 @@ fun main(args: Array<String>) {
     val projectArn: String = map["--projectArn"]!!
     val devicePoolArn: String = map["--devicePoolArn"]!!
 
+    val appType = if (apkPath.endsWith("apk")) {
+        UploadType.ANDROID_APP
+    } else {
+        UploadType.IOS_APP
+    }
+
+    val testsType = if (apkPath.endsWith("apk")) {
+        UploadType.INSTRUMENTATION_TEST_PACKAGE
+    } else {
+        UploadType.XCTEST_TEST_PACKAGE
+    }
+
 
     val deviceFarmClient = DeviceFarmClient.builder()
         .region(region)
         .build()
     val appArn = deviceFarmClient.upload(
-        name = "app-$uniqueName.apk",
+        name = "app-$uniqueName.ipa",
         path = apkPath,
-        type = UploadType.ANDROID_APP,
+        type = appType,
         projectArn = projectArn
     )
 
     val testArn = deviceFarmClient.upload(
-        name = "androidTest-$uniqueName.apk",
+        name = "androidTest-$uniqueName.xctest.zip",
         path = androidTestApkPath,
-        type = UploadType.INSTRUMENTATION_TEST_PACKAGE,
+        type = testsType,
         projectArn = projectArn
     )
 
