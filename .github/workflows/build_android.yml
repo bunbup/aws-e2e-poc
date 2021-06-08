@@ -1,0 +1,39 @@
+name: Android CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: renatoathaydes/setup-java-sdkman@2.1.1
+      with:
+        java-version: '11.0.2-open' # The SDKMAN! JDK version to use.
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Install kotlin
+      run: source /home/runner/.sdkman/bin/sdkman-init.sh && sdk install kotlin 
+    - name: Install kscript
+      run: source /home/runner/.sdkman/bin/sdkman-init.sh && sdk install kscript
+    - name: Create local.properties with keys
+      run: echo -e "\npubnub.subKey=${{ secrets.PUBNUB_SUB_KEY }}\npubnub.pubKey=${{ secrets.PUBNUB_PUB_KEY }}" >> local.properties && cat local.properties
+    - name: Build with Gradle
+      run: ./gradlew build packageDebugAndroidTest && ls -la app/build/outputs/apk/androidTest/debug/
+    - name: Run tests on aws
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+      run: source /home/runner/.sdkman/bin/sdkman-init.sh && kscript scripts/src/main/kotlin/Script.kt --appPath app/build/outputs/apk/debug/app-debug.apk --testsPath app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk --projectArn arn:aws:devicefarm:us-west-2:806583214236:project:689ad938-8bac-40a4-a511-da1afafb3c50 --devicePoolArn arn:aws:devicefarm:us-west-2:806583214236:devicepool:689ad938-8bac-40a4-a511-da1afafb3c50/24745f40-31b0-4ce6-ad0b-4936af61e16f
+    - name: Upload Test Reports Folder
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
+      with:
+        name: reports
+        path: artifacts/
