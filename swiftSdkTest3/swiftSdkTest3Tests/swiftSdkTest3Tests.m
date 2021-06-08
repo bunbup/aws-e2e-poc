@@ -1,18 +1,18 @@
 //
-//  swiftSdkTestTests.m
-//  swiftSdkTestTests
+//  swiftSdkTest3Tests.m
+//  swiftSdkTest3Tests
 //
-//  Created by Lukasz Klich on 07/06/2021.
+//  Created by Lukasz Klich on 08/06/2021.
 //  Copyright © 2021 Lukasz Klich. All rights reserved.
 //
 
 #import <XCTest/XCTest.h>
 
-@interface swiftSdkTestTests : XCTestCase
+@interface swiftSdkTest3Tests : XCTestCase
 
 @end
 
-@implementation swiftSdkTestTests
+@implementation swiftSdkTest3Tests
 
 - (void)setUp {
     // Put setup code here. This method is called before the invocation of each test method in the class.

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eo pipefail -o xtrace
 
-PROJECT=swiftSdkTest2
+PROJECT=swiftSdkTest3
 CURRENT_DIR=`pwd`
 TMPDIR=`mktemp -d /tmp/${PROJECT}.XXX` || exit 1
 BUILD_PATH=$TMPDIR/$PROJECT/build

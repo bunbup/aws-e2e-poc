@@ -33,12 +33,12 @@ jobs:
     - name: Install cocoapods
       run: gem install cocoapods
     - name: Building project
-      run: cd swiftSdkTest && ../scripts/./create_ipa.sh
+      run: cd swiftSdkTest3 && ../scripts/./create_ipa.sh
     - name: Run tests on aws
       env: 
         DEVICE_POOL_ARN: arn:aws:devicefarm:us-west-2:806583214236:devicepool:4e17f447-cc58-4c2b-9167-3924045c5b82/4718d99b-47d5-4a0a-a281-4c12cc594c96
         PROJECT_ARN: arn:aws:devicefarm:us-west-2:806583214236:project:4e17f447-cc58-4c2b-9167-3924045c5b82
-      run: source $HOME/.sdkman/bin/sdkman-init.sh && kscript ../scripts/src/main/kotlin/Script.kt --apkPath Payload.ipa --androidTestApkPath swiftSdkTest2Tests.xctest.zip --projectArn $PROJECT_ARN --devicePoolArn $DEVICE_POOL_ARN
+      run: source $HOME/.sdkman/bin/sdkman-init.sh && kscript ../scripts/src/main/kotlin/Script.kt --apkPath Payload.ipa --androidTestApkPath swiftSdkTest3Tests.xctest.zip --projectArn $PROJECT_ARN --devicePoolArn $DEVICE_POOL_ARN
     - name: Upload Test Reports Folder
       uses: actions/upload-artifact@v2
       if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
