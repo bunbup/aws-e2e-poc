@@ -22,8 +22,6 @@ jobs:
       run: source $HOME/.sdkman/bin/sdkman-init.sh && sdk install kscript 3.1.0
     - name: Create local.properties with keys
       run: echo -e "\npubnub.subKey=${{ secrets.PUBNUB_SUB_KEY }}\npubnub.pubKey=${{ secrets.PUBNUB_PUB_KEY }}" >> local.properties && cat local.properties
-    - name: Create aws credentials file
-      run: mkdir $HOME/.aws && echo -e "[default]\naws_access_key_id=${{ secrets.AWS_KEY_ID }}\naws_secret_access_key=${{ secrets.AWS_SECRET_KEY }}\n" > $HOME/.aws/credentials 
     - name: Install gpg
       run: brew install gpg
     - name: Setup provisioning profile
@@ -38,8 +36,8 @@ jobs:
       env: 
         DEVICE_POOL_ARN: arn:aws:devicefarm:us-west-2:806583214236:devicepool:4e17f447-cc58-4c2b-9167-3924045c5b82/4718d99b-47d5-4a0a-a281-4c12cc594c96
         PROJECT_ARN: arn:aws:devicefarm:us-west-2:806583214236:project:4e17f447-cc58-4c2b-9167-3924045c5b82
-        #AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY_ID }}
-        #AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
       run: source $HOME/.sdkman/bin/sdkman-init.sh && cd swiftSdkTest3 && kscript ../scripts/src/main/kotlin/Script.kt --apkPath Payload.ipa --androidTestApkPath swiftSdkTest3Tests.xctest.zip --projectArn $PROJECT_ARN --devicePoolArn $DEVICE_POOL_ARN
     - name: Upload Test Reports Folder
       uses: actions/upload-artifact@v2
