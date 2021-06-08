@@ -15,7 +15,6 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import java.nio.file.attribute.FileAttribute
 import java.time.Duration
 import java.util.*
 import kotlin.system.exitProcess
@@ -114,15 +113,28 @@ fun DeviceFarmClient.downloadArtifacts(arn: String) {
         listSuites { it.arn(job.arn()) }.suites().forEach { suite ->
             listTests { it.arn(suite.arn()) }.tests().forEach { test ->
                 listArtifacts { it.arn(test.arn()).type(ArtifactCategory.LOG) }.artifacts().forEach { artifact ->
-                    client.newCall(Request.Builder()
-                        .get()
-                        .url(artifact.url())
-                        .build())
+                    client.newCall(
+                        Request.Builder()
+                            .get()
+                            .url(artifact.url())
+                            .build()
+                    )
                         .execute().use {
                             if (it.code == 200) {
-                                val filePath = Paths.get(basePath.toString(), "${job.name()}-${suite.name()}-${test.name().replace(":", "_")}-${artifact.type()}-${artifact.name()}.${artifact.extension()}")
+                                val filePath = Paths.get(
+                                    basePath.toString(),
+                                    "${job.name()}-${suite.name()}-${
+                                        test.name().replace(":", "_")
+                                    }-${artifact.type()}-${artifact.name()}.${artifact.extension()}"
+                                )
                                 logger.info("Writing response to $filePath")
-                                Files.write(filePath, it.body!!.bytes(), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
+                                Files.write(
+                                    filePath,
+                                    it.body!!.bytes(),
+                                    StandardOpenOption.TRUNCATE_EXISTING,
+                                    StandardOpenOption.WRITE,
+                                    StandardOpenOption.CREATE
+                                )
                             }
                         }
                 }
@@ -193,6 +205,13 @@ private fun DeviceFarmClient.runTests(
 
 object Script
 
+data class TypesAndNames(
+    val appType: UploadType,
+    val appName: String,
+    val testsType: UploadType,
+    val testsName: String
+)
+
 fun main(args: Array<String>) {
     val map: Map<String, String> = args.fold(Pair(emptyMap<String, String>(), "")) { (map, lastKey), elem ->
         if (elem.startsWith("-")) Pair(map, elem)
@@ -201,39 +220,38 @@ fun main(args: Array<String>) {
 
     println(map)
 
-    check(map.keys.containsAll(listOf("--apkPath", "--androidTestApkPath", "--projectArn", "--devicePoolArn")))
+    check(map.keys.containsAll(listOf("--appPath", "--testsPath", "--projectArn", "--devicePoolArn")))
 
-    val apkPath: String = map["--apkPath"]!!
-    val androidTestApkPath: String = map["--androidTestApkPath"]!!
+    val appPath: String = map["--appPath"]!!
+    val testsPath: String = map["--testsPath"]!!
     val projectArn: String = map["--projectArn"]!!
     val devicePoolArn: String = map["--devicePoolArn"]!!
 
-    val appType = if (apkPath.endsWith("apk")) {
-        UploadType.ANDROID_APP
+    val (appType, appName, testsType, testsName) = if (appPath.endsWith("apk")) {
+        TypesAndNames(UploadType.ANDROID_APP,
+        "app-$uniqueName.apk",
+        UploadType.INSTRUMENTATION_TEST_PACKAGE,
+        "tests-$uniqueName.apk")
     } else {
-        UploadType.IOS_APP
+        TypesAndNames(UploadType.IOS_APP,
+        "app-$uniqueName.ipa",
+        UploadType.XCTEST_TEST_PACKAGE,
+        "tests-$uniqueName.xctest.zip")
     }
-
-    val testsType = if (apkPath.endsWith("apk")) {
-        UploadType.INSTRUMENTATION_TEST_PACKAGE
-    } else {
-        UploadType.XCTEST_TEST_PACKAGE
-    }
-
 
     val deviceFarmClient = DeviceFarmClient.builder()
         .region(region)
         .build()
     val appArn = deviceFarmClient.upload(
-        name = "app-$uniqueName.ipa",
-        path = apkPath,
+        name = appName,
+        path = appPath,
         type = appType,
         projectArn = projectArn
     )
 
     val testArn = deviceFarmClient.upload(
-        name = "androidTest-$uniqueName.xctest.zip",
-        path = androidTestApkPath,
+        name = testsName,
+        path = testsPath,
         type = testsType,
         projectArn = projectArn
     )
