@@ -17,9 +17,9 @@ jobs:
       with:
         java-version: '11.0.2-open' # The SDKMAN! JDK version to use.
     - name: Install kotlin
-      run: source $HOME/.sdkman/bin/sdkman-init.sh && sdk install kotlin 
+      run: source $HOME/.sdkman/bin/sdkman-init.sh && sdk install kotlin 1.5.0
     - name: Install kscript
-      run: source $HOME/.sdkman/bin/sdkman-init.sh && sdk install kscript
+      run: source $HOME/.sdkman/bin/sdkman-init.sh && sdk install kscript 3.1.0
     - name: Create local.properties with keys
       run: echo -e "\npubnub.subKey=${{ secrets.PUBNUB_SUB_KEY }}\npubnub.pubKey=${{ secrets.PUBNUB_PUB_KEY }}" >> local.properties && cat local.properties
     - name: Create aws credentials file
@@ -44,5 +44,5 @@ jobs:
       if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
       with:
         name: reports
-        path: artifacts/
+        path: swiftSdkTest3/artifacts/
     
