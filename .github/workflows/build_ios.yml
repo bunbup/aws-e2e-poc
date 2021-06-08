@@ -23,7 +23,7 @@ jobs:
     - name: Create local.properties with keys
       run: echo -e "\npubnub.subKey=${{ secrets.PUBNUB_SUB_KEY }}\npubnub.pubKey=${{ secrets.PUBNUB_PUB_KEY }}" >> local.properties && cat local.properties
     - name: Create aws credentials file
-      run: mkdir $HOME/.aws && echo -e "[default]\naws_access_key_id=${{ secrets.AWS_KEY_ID }}\naws_secret_access_key=${{ secrets.AWS_SECRET_KEY }}\n" > $HOME/.aws/credentials && ls -la ~/.aws && pwd
+      run: mkdir $HOME/.aws && echo -e "[default]\naws_access_key_id=${{ secrets.AWS_KEY_ID }}\naws_secret_access_key=${{ secrets.AWS_SECRET_KEY }}\n" > $HOME/.aws/credentials && ls -la ~/.aws && pwd && cat ~/.aws/credentials
     - name: Install gpg
       run: brew install gpg
     - name: Setup provisioning profile
