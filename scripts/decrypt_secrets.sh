@@ -1,12 +1,13 @@
 #!/bin/sh
 set -eo pipefail
 
-gpg --quiet --batch --yes --decrypt --passphrase="$GPG_PASS" --output ./.github/secrets/6e742bf5-5ba7-4b72-9204-9c972c7477ee.mobileprovision ./.github/secrets/6e742bf5-5ba7-4b72-9204-9c972c7477ee.mobileprovision.gpg
+MOBILEPROVISION=86521506-abef-4121-af5b-d7d8ff30d0dc.mobileprovision
+gpg --quiet --batch --yes --decrypt --passphrase="$GPG_PASS" --output ./.github/secrets/$MOBILEPROVISION ./.github/secrets/$MOBILEPROVISION.gpg
 gpg --quiet --batch --yes --decrypt --passphrase="$GPG_PASS" --output ./.github/secrets/cert.p12 ./.github/secrets/cert.p12.gpg
 
 mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
 
-cp ./.github/secrets/6e742bf5-5ba7-4b72-9204-9c972c7477ee.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+cp ./.github/secrets/$MOBILEPROVISION ~/Library/MobileDevice/Provisioning\ Profiles/
 
 security create-keychain -p "" build.keychain
 security import ./.github/secrets/cert.p12 -t agg -k ~/Library/Keychains/build.keychain -P "$GPG_PASS" -A
