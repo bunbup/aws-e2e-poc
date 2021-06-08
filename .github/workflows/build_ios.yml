@@ -1,4 +1,4 @@
-name: Android CI
+name: iOS CI
 
 on:
   push:
@@ -13,6 +13,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - uses: renatoathaydes/setup-java-sdkman@2.1.1
+      with:
+        java-version: '11.0.2-open' # The SDKMAN! JDK version to use.
+    - name: Install kotlin
+      run: source $HOME/.sdkman/bin/sdkman-init.sh && sdk install kotlin 
+    - name: Install kscript
+      run: source $HOME/.sdkman/bin/sdkman-init.sh && sdk install kscript
+    - name: Create local.properties with keys
+      run: echo -e "\npubnub.subKey=${{ secrets.PUBNUB_SUB_KEY }}\npubnub.pubKey=${{ secrets.PUBNUB_PUB_KEY }}" >> local.properties && cat local.properties
+    - name: Create aws credentials file
+      run: mkdir $HOME/.aws && echo -e "[default]\naws_access_key_id=${{ secrets.AWS_KEY_ID }}\naws_secret_access_key=${{ secrets.AWS_SECRET_KEY }}\n" > $HOME/.aws/credentials
     - name: Install gpg
       run: brew install gpg
     - name: Setup provisioning profile
@@ -21,8 +32,17 @@ jobs:
       run: gpg --version && ./scripts/decrypt_secrets.sh
     - name: Install cocoapods
       run: gem install cocoapods
-    - name: Archiving project
-      env:
-        PR_NUMBER: $(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+    - name: Building project
       run: cd swiftSdkTest && ../scripts/./create_ipa.sh
+    - name: Run tests on aws
+      env: 
+        DEVICE_POOL_ARN: arn:aws:devicefarm:us-west-2:806583214236:devicepool:4e17f447-cc58-4c2b-9167-3924045c5b82/4718d99b-47d5-4a0a-a281-4c12cc594c96
+        PROJECT_ARN: arn:aws:devicefarm:us-west-2:806583214236:project:4e17f447-cc58-4c2b-9167-3924045c5b82
+      run: source $HOME/.sdkman/bin/sdkman-init.sh && kscript ../scripts/src/main/kotlin/Script.kt --apkPath Payload.ipa --androidTestApkPath swiftSdkTest2Tests.xctest.zip --projectArn $PROJECT_ARN --devicePoolArn $DEVICE_POOL_ARN
+    - name: Upload Test Reports Folder
+      uses: actions/upload-artifact@v2
+      if: ${{ always() }} # IMPORTANT: Upload reports regardless of status
+      with:
+        name: reports
+        path: artifacts/
     
