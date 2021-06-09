@@ -186,7 +186,8 @@ private fun DeviceFarmClient.runTests(
     appArn: String,
     testArn: String,
     projectArn: String,
-    devicePoolArn: String
+    devicePoolArn: String,
+    testType: TestType
 ): ScheduleRunResponse? {
     val result = scheduleRun {
         it.projectArn(projectArn)
@@ -195,7 +196,7 @@ private fun DeviceFarmClient.runTests(
             .name(uniqueName)
             .test { t ->
                 t.testPackageArn(testArn)
-                    .type(TestType.XCTEST)
+                    .type(testType)
                     .build()
             }.build()
     }
@@ -209,7 +210,8 @@ data class TypesAndNames(
     val appType: UploadType,
     val appName: String,
     val testsType: UploadType,
-    val testsName: String
+    val testsName: String,
+    val testType: TestType
 )
 
 fun main(args: Array<String>) {
@@ -227,16 +229,18 @@ fun main(args: Array<String>) {
     val projectArn: String = map["--projectArn"]!!
     val devicePoolArn: String = map["--devicePoolArn"]!!
 
-    val (appType, appName, testsType, testsName) = if (appPath.endsWith("apk")) {
+    val (appType, appName, testsType, testsName, testType) = if (appPath.endsWith("apk")) {
         TypesAndNames(UploadType.ANDROID_APP,
         "app-$uniqueName.apk",
         UploadType.INSTRUMENTATION_TEST_PACKAGE,
-        "tests-$uniqueName.apk")
+        "tests-$uniqueName.apk",
+        TestType.INSTRUMENTATION)
     } else {
         TypesAndNames(UploadType.IOS_APP,
         "app-$uniqueName.ipa",
         UploadType.XCTEST_TEST_PACKAGE,
-        "tests-$uniqueName.xctest.zip")
+        "tests-$uniqueName.xctest.zip",
+        TestType.XCTEST)
     }
 
     val deviceFarmClient = DeviceFarmClient.builder()
@@ -260,6 +264,7 @@ fun main(args: Array<String>) {
         appArn = appArn,
         testArn = testArn,
         projectArn = projectArn,
-        devicePoolArn = devicePoolArn
+        devicePoolArn = devicePoolArn,
+        testType = testType
     )
 }
