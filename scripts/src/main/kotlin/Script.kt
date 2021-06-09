@@ -15,7 +15,6 @@ import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardOpenOption
-import java.nio.file.attribute.FileAttribute
 import java.time.Duration
 import java.util.*
 import kotlin.system.exitProcess
@@ -90,6 +89,7 @@ fun DeviceFarmClient.waitForTests(arn: String) {
                     exitProcess(7)
                 }
                 else -> {
+                    downloadArtifacts(arn)
                     logger.error("Run $arn have unexpected ExecutionResult: ${resp.run().result()}")
                     exitProcess(8)
                 }
@@ -113,15 +113,28 @@ fun DeviceFarmClient.downloadArtifacts(arn: String) {
         listSuites { it.arn(job.arn()) }.suites().forEach { suite ->
             listTests { it.arn(suite.arn()) }.tests().forEach { test ->
                 listArtifacts { it.arn(test.arn()).type(ArtifactCategory.LOG) }.artifacts().forEach { artifact ->
-                    client.newCall(Request.Builder()
-                        .get()
-                        .url(artifact.url())
-                        .build())
+                    client.newCall(
+                        Request.Builder()
+                            .get()
+                            .url(artifact.url())
+                            .build()
+                    )
                         .execute().use {
                             if (it.code == 200) {
-                                val filePath = Paths.get(basePath.toString(), "${job.name()}-${suite.name()}-${test.name().replace(":", "_")}-${artifact.type()}-${artifact.name()}.${artifact.extension()}")
+                                val filePath = Paths.get(
+                                    basePath.toString(),
+                                    "${job.name()}-${suite.name()}-${
+                                        test.name().replace(":", "_")
+                                    }-${artifact.type()}-${artifact.name()}.${artifact.extension()}"
+                                )
                                 logger.info("Writing response to $filePath")
-                                Files.write(filePath, it.body!!.bytes(), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
+                                Files.write(
+                                    filePath,
+                                    it.body!!.bytes(),
+                                    StandardOpenOption.TRUNCATE_EXISTING,
+                                    StandardOpenOption.WRITE,
+                                    StandardOpenOption.CREATE
+                                )
                             }
                         }
                 }
@@ -173,7 +186,8 @@ private fun DeviceFarmClient.runTests(
     appArn: String,
     testArn: String,
     projectArn: String,
-    devicePoolArn: String
+    devicePoolArn: String,
+    testType: TestType
 ): ScheduleRunResponse? {
     val result = scheduleRun {
         it.projectArn(projectArn)
@@ -182,7 +196,7 @@ private fun DeviceFarmClient.runTests(
             .name(uniqueName)
             .test { t ->
                 t.testPackageArn(testArn)
-                    .type(TestType.INSTRUMENTATION)
+                    .type(testType)
                     .build()
             }.build()
     }
@@ -192,6 +206,14 @@ private fun DeviceFarmClient.runTests(
 
 object Script
 
+data class TypesAndNames(
+    val appType: UploadType,
+    val appName: String,
+    val testsType: UploadType,
+    val testsName: String,
+    val testType: TestType
+)
+
 fun main(args: Array<String>) {
     val map: Map<String, String> = args.fold(Pair(emptyMap<String, String>(), "")) { (map, lastKey), elem ->
         if (elem.startsWith("-")) Pair(map, elem)
@@ -200,28 +222,41 @@ fun main(args: Array<String>) {
 
     println(map)
 
-    check(map.keys.containsAll(listOf("--apkPath", "--androidTestApkPath", "--projectArn", "--devicePoolArn")))
+    check(map.keys.containsAll(listOf("--appPath", "--testsPath", "--projectArn", "--devicePoolArn")))
 
-    val apkPath: String = map["--apkPath"]!!
-    val androidTestApkPath: String = map["--androidTestApkPath"]!!
+    val appPath: String = map["--appPath"]!!
+    val testsPath: String = map["--testsPath"]!!
     val projectArn: String = map["--projectArn"]!!
     val devicePoolArn: String = map["--devicePoolArn"]!!
 
+    val (appType, appName, testsType, testsName, testType) = if (appPath.endsWith("apk")) {
+        TypesAndNames(UploadType.ANDROID_APP,
+        "app-$uniqueName.apk",
+        UploadType.INSTRUMENTATION_TEST_PACKAGE,
+        "tests-$uniqueName.apk",
+        TestType.INSTRUMENTATION)
+    } else {
+        TypesAndNames(UploadType.IOS_APP,
+        "app-$uniqueName.ipa",
+        UploadType.XCTEST_TEST_PACKAGE,
+        "tests-$uniqueName.xctest.zip",
+        TestType.XCTEST)
+    }
 
     val deviceFarmClient = DeviceFarmClient.builder()
         .region(region)
         .build()
     val appArn = deviceFarmClient.upload(
-        name = "app-$uniqueName.apk",
-        path = apkPath,
-        type = UploadType.ANDROID_APP,
+        name = appName,
+        path = appPath,
+        type = appType,
         projectArn = projectArn
     )
 
     val testArn = deviceFarmClient.upload(
-        name = "androidTest-$uniqueName.apk",
-        path = androidTestApkPath,
-        type = UploadType.INSTRUMENTATION_TEST_PACKAGE,
+        name = testsName,
+        path = testsPath,
+        type = testsType,
         projectArn = projectArn
     )
 
@@ -229,6 +264,7 @@ fun main(args: Array<String>) {
         appArn = appArn,
         testArn = testArn,
         projectArn = projectArn,
-        devicePoolArn = devicePoolArn
+        devicePoolArn = devicePoolArn,
+        testType = testType
     )
 }
