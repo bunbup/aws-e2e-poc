@@ -31,6 +31,9 @@ jobs:
     - name: Install cocoapods
       run: gem install cocoapods
     - name: Building project
+      env:
+        PUBNUB_SUB_KEY: ${{ secrets.PUBNUB_SUB_KEY }}
+        PUBNUB_PUB_KEY: ${{ secrets.PUBNUB_PUB_KEY }}
       run: cd swiftSdkTest3 && ../scripts/./create_ipa.sh
     - name: Run tests on aws
       env: 

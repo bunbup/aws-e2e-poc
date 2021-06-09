@@ -7,6 +7,8 @@
 //
 
 #import <XCTest/XCTest.h>
+#import <PubNub/PubNub.h>
+
 
 @interface swiftSdkTest3Tests : XCTestCase
 
@@ -24,7 +26,13 @@
 
 - (void)testExample {
     // This is an example of a functional test case.
-    // Use XCTAssert and related functions to verify your tests produce the correct results.
+    // Use XCTAssert and related functions to verify your tests produce the correct results
+    XCTAssertTrue([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"PUBNUB_PUB_KEY"] length] != 0);
+    XCTAssertTrue([[[NSBundle mainBundle] objectForInfoDictionaryKey:@"PUBNUB_SUB_KEY"] length] != 0);
+    PNConfiguration *pnconfig = [PNConfiguration configurationWithPublishKey:@"myPublishKey"
+                                                            subscribeKey:@"mySubscribeKey"];
+    pnconfig.uuid = @"ReplaceWithYourClientIdentifier";
+    PubNub *client = [PubNub clientWithConfiguration:pnconfig];
 }
 
 - (void)testPerformanceExample {

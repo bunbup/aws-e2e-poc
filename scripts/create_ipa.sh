@@ -9,8 +9,10 @@ PAYLOAD_PATH=$TMPDIR/Payload
 XCTEST_DIR_NAME=${PROJECT}Tests.xctest
 XCTEST_ZIP_PATH=$TMPDIR/$XCTEST_DIR_NAME.zip
 
-#pod install
-xcodebuild build-for-testing -project ./$PROJECT.xcodeproj -allowProvisioningUpdates -scheme ${PROJECT} -derivedDataPath $BUILD_PATH -verbose
+pod install
+/usr/libexec/PlistBuddy -c "Set :PUBNUB_PUB_KEY $PUBNUB_PUB_KEY" $PROJECT/Info.plist
+/usr/libexec/PlistBuddy -c "Set :PUBNUB_SUB_KEY $PUBNUB_SUB_KEY" $PROJECT/Info.plist
+xcodebuild build-for-testing -workspace ./$PROJECT.xcworkspace -allowProvisioningUpdates -scheme ${PROJECT} -derivedDataPath $BUILD_PATH -verbose
 mkdir -p $PAYLOAD_PATH/Payload
 cp -r $BUILD_PATH/Build/Products/Debug-iphoneos/$PROJECT.app $PAYLOAD_PATH/Payload
 cd $PAYLOAD_PATH && zip -r -X "../Payload.ipa" . && cd -
