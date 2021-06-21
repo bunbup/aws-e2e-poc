@@ -13,6 +13,14 @@ device farm. The `.ipa` files need to be signed so I had to upload my own certif
 The automatic process of running this is in `./.github/workflows/build_ios.yml` with two additional scripts in `./scripts/` directory, namely: `decrypt_secrets.sh` which decrypts the certificates, and the `create_ipa.sh` which 
 builds the project with tests. Once again the upload to device farm is handled by `./scripts/src/main/kotlin/Script.kt`.
 
+### Secret files
+
+To encrypt them:
+
+```
+gpg --symmetric --cipher-algo AES256 <file>
+```
+
 ## scripts
 
 Initially for scripting I decided to check kotlin script instead of bash. The `./scripts/src/main/kotlin/Script.kt` together with the `./scripts/build.gradle` is the only script I've created
