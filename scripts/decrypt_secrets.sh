@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eo pipefail
 
-MOBILEPROVISION=246e6359-7110-4d47-8371-8f17296c784e.mobileprovision
+MOBILEPROVISION=Lukasz_Klich_apps.mobileprovision
 gpg --quiet --batch --yes --decrypt --passphrase="$GPG_PASS" --output ./.github/secrets/$MOBILEPROVISION ./.github/secrets/$MOBILEPROVISION.gpg
 gpg --quiet --batch --yes --decrypt --passphrase="$GPG_PASS" --output ./.github/secrets/cert.p12 ./.github/secrets/cert.p12.gpg
 
