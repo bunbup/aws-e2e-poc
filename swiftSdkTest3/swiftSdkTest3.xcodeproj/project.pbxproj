@@ -507,8 +507,10 @@
 			baseConfigurationReference = CCC9CAB7E70C90500FE33E04 /* Pods-swiftSdkTest3Tests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 38554S8TC8;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = LJE3GJ53Z7;
 				INFOPLIST_FILE = swiftSdkTest3Tests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -518,6 +520,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kleewho.swiftSdkTest3Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/swiftSdkTest3.app/swiftSdkTest3";
 			};
@@ -528,8 +532,10 @@
 			baseConfigurationReference = 4BA3074613F01C8713CD1468 /* Pods-swiftSdkTest3Tests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = 38554S8TC8;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = LJE3GJ53Z7;
 				INFOPLIST_FILE = swiftSdkTest3Tests/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.6;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -539,6 +545,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = kleewho.swiftSdkTest3Tests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/swiftSdkTest3.app/swiftSdkTest3";
 			};
