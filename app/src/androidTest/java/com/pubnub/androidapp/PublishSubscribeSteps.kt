@@ -19,18 +19,16 @@ import java.util.*
 
 class PublishSubscribeSteps {
 
-    lateinit var pubnub: PubNub
-    private val channelSubscriptions: MutableMap<String, MutableList<PNMessageResult>> = Collections.synchronizedMap(
-        mutableMapOf())
-
-    @Before
-    fun before() {
-        pubnub = PubNub(PNConfiguration().apply {
+    private val pubnub: PubNub by lazy {
+        PubNub(PNConfiguration().apply {
             subscribeKey = Keys().provideSubKey()
             publishKey = Keys().providePubKey()
             logVerbosity = PNLogVerbosity.BODY
         })
+
     }
+    private val channelSubscriptions: MutableMap<String, MutableList<PNMessageResult>> = Collections.synchronizedMap(
+        mutableMapOf())
 
     @After
     fun after() {
