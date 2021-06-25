@@ -21,8 +21,8 @@ class PublishSubscribeSteps {
 
     private val pubnub: PubNub by lazy {
         PubNub(PNConfiguration().apply {
-            subscribeKey = Keys().provideSubKey()
-            publishKey = Keys().providePubKey()
+            subscribeKey = BuildConfig.PUBNUB_SUB_KEY
+            publishKey = BuildConfig.PUBNUB_PUB_KEY
             logVerbosity = PNLogVerbosity.BODY
         })
 
