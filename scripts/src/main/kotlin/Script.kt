@@ -230,6 +230,7 @@ fun main(args: Array<String>) {
     val testsPath: String = map["--testsPath"]!!
     val projectArn: String = map["--projectArn"]!!
     val devicePoolArn: String = map["--devicePoolArn"]!!
+    val testSpecArn: String? = map["--testSpecArn"]
 
     val (appType, appName, testsType, testsName, testType) = if (appPath.endsWith("apk")) {
         TypesAndNames(UploadType.ANDROID_APP,
@@ -268,6 +269,6 @@ fun main(args: Array<String>) {
         projectArn = projectArn,
         devicePoolArn = devicePoolArn,
         testType = testType,
-        customTestSpec = if (appPath.endsWith("apk")) "arn:aws:devicefarm:us-west-2:806583214236:upload:689ad938-8bac-40a4-a511-da1afafb3c50/67e12060-b99a-4bc8-b1d7-df88568c94e2" else null
+        customTestSpec = testSpecArn
     )
 }
