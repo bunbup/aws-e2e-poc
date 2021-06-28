@@ -187,7 +187,8 @@ private fun DeviceFarmClient.runTests(
     testArn: String,
     projectArn: String,
     devicePoolArn: String,
-    testType: TestType
+    testType: TestType,
+    customTestSpec: String?
 ): ScheduleRunResponse? {
     val result = scheduleRun {
         it.projectArn(projectArn)
@@ -195,7 +196,8 @@ private fun DeviceFarmClient.runTests(
             .appArn(appArn)
             .name(uniqueName)
             .test { t ->
-                t.testPackageArn(testArn)
+                customTestSpec?.let { testSpec -> t.testSpecArn(testSpec) } ?: t
+                    .testPackageArn(testArn)
                     .type(testType)
                     .build()
             }.build()
@@ -265,6 +267,7 @@ fun main(args: Array<String>) {
         testArn = testArn,
         projectArn = projectArn,
         devicePoolArn = devicePoolArn,
-        testType = testType
+        testType = testType,
+        customTestSpec = if (appPath.endsWith("apk")) "arn:aws:devicefarm:us-west-2:806583214236:upload:689ad938-8bac-40a4-a511-da1afafb3c50/67e12060-b99a-4bc8-b1d7-df88568c94e2" else null
     )
 }
