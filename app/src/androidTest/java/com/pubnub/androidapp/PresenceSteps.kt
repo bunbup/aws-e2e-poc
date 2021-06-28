@@ -27,17 +27,17 @@ class PresenceSteps {
 
     private val presenceEventResultsPerPeer: MutableMap<String, MutableList<PNPresenceEventResult>> = mutableMapOf()
 
-    @Given("I have a valid publish key")
+    @Given("_I have a valid publish key")
     fun Given_I_have_a_valid_publish_key() {
         pubKey = "demo-36"
     }
 
-    @And("I have a valid subscribe key")
+    @And("_I have a valid subscribe key")
     fun And_I_have_a_valid_subscribe_key() {
         subKey = "demo-36"
     }
 
-    @And("I create PubNub instance for {peerId}")
+    @And("_I create PubNub instance for {peerId}")
     fun And_I_create_PubNub_instance_for(peerId: String) {
         peers[peerId] = PubNub(PNConfiguration().apply {
             subscribeKey = subKey

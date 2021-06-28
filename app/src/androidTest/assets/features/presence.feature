@@ -1,9 +1,9 @@
 Feature: Presence
   Background:
-    Given I have a valid publish key
-    And I have a valid subscribe key
-    And I create PubNub instance for PeerA
-    And I create PubNub instance for PeerB
+    Given _I have a valid publish key
+    And _I have a valid subscribe key
+    And _I create PubNub instance for PeerA
+    And _I create PubNub instance for PeerB
     And I have a random channel test
 
   Scenario: Peers can observe presence
