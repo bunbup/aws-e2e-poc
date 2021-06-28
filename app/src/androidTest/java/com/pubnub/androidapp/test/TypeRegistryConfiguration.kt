@@ -22,12 +22,18 @@ class TypeRegistryConfiguration : TypeRegistryConfigurer {
                 Transformer<String?> { text -> text })
         )
         typeRegistry.defineParameterType(
-
             ParameterType<String>(
                 "msg",
                 "(\\S+)",
                 String::class.java,
                 Transformer<String?> { text -> text })
+        )
+        typeRegistry.defineParameterType(
+            ParameterType<String>(
+                "peerId",
+                "(\\S+)",
+                String::class.java,
+                Transformer<String?> { text -> text})
         )
     }
 }
