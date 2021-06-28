@@ -1,4 +1,4 @@
-package com.pubnub.androidapp.publishsubscribe
+package com.pubnub.androidapp.publishsubscribe.steps
 
 import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import com.pubnub.androidapp.BuildConfig
