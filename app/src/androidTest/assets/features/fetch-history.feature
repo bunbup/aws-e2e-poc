@@ -1,4 +1,4 @@
-Feature: Publish and Subscribe
+Feature: Fetch History
   Background:
     Given I have a valid publish key
     And I have a valid subscribe key
