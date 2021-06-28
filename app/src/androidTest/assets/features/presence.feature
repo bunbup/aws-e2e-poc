@@ -9,6 +9,6 @@ Feature: Presence
   Scenario: Peers can observe presence
     Given PeerA registers listener for presence changes
     And PeerA subscribes to channel test including presence changes
-    And PeerA's subscription is up and running
+    And _PeerA's subscription is up and running
     When PeerB subscribes to channel test
     Then PeerA is notified that PeerB has joined channel test

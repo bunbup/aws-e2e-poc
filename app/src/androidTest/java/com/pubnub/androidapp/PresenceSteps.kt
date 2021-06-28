@@ -63,7 +63,7 @@ class PresenceSteps {
         peers[peerId]?.subscribe(channels = listOf(channels[channel]!!))
     }
 
-    @And("{peerId}'s subscription is up and running")
+    @And("_{peerId}'s subscription is up and running")
     fun And_Peers_subscription_is_up_and_running(peerId: String) {
         val connected = CountDownLatch(1)
         peers[peerId]?.addListener(object : SubscribeCallback() {
