@@ -8,7 +8,7 @@ Feature: Publish and Subscribe
   Scenario: Peers can exchange messages over channel
     Given I have a random channel (test channel)
     And PeerB registers listener for incoming messages
-    And PeerB declares its subscription to test channel
+    And PeerB subscribes to test channel
     And PeerB's subscription is up and running
     And Random message (test message) is generated
     When PeerA publishes test message to test channel
