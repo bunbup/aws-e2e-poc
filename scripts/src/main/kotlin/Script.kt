@@ -196,7 +196,7 @@ private fun DeviceFarmClient.runTests(
             .appArn(appArn)
             .name(uniqueName)
             .test { t ->
-                customTestSpec?.let { testSpec -> t.testSpecArn(testSpec) } ?: t
+                (customTestSpec?.let { testSpec -> t.testSpecArn(testSpec) } ?: t)
                     .testPackageArn(testArn)
                     .type(testType)
                     .build()
