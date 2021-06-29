@@ -5,7 +5,7 @@ Feature: Publish and Subscribe
     And I have a random channel
 
   Scenario: Peers can exchange messages over channel
-    Given PeerB registers listener for messages
+    Given PeerB registers listener for message
     And PeerB subscribes to test channel
     And PeerB's subscription is up and running
     And Random message content is generated

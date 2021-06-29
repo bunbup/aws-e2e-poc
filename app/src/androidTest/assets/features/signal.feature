@@ -5,7 +5,7 @@ Feature: Signals
     And I have a random channel
 
   Scenario: Peers can observe presence
-    Given PeerA registers listener for signals
+    Given PeerA registers listener for signal
     And PeerA subscribes to test channel
     And PeerA's subscription is up and running
     And Random signal content is generated

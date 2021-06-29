@@ -5,12 +5,13 @@ import com.pubnub.api.PubNub
 import com.pubnub.api.callbacks.SubscribeCallback
 import com.pubnub.api.models.consumer.PNStatus
 import com.pubnub.api.models.consumer.pubsub.PNMessageResult
+import com.pubnub.api.models.consumer.pubsub.PNPresenceEventResult
 import com.pubnub.api.models.consumer.pubsub.PNSignalResult
 import io.cucumber.java.en.Given
 
 class RegisterListenerStepDefinition(private val peers: Peers) {
 
-    @Given("{peerId} registers listener for {eventType}s")
+    @Given("{peerId} registers listener for {eventType}")
     fun registerListenerForSignals(peerId: String, eventType: String){
         val peer = peers.peers[peerId]
         peer?.pubnub?.addListener(object : SubscribeCallback() {
@@ -40,6 +41,15 @@ class RegisterListenerStepDefinition(private val peers: Peers) {
                         list?.add(pnMessageResult.message.asString)
                     }
                 }
+            }
+
+            override fun presence(pubnub: PubNub, pnPresenceEventResult: PNPresenceEventResult) {
+                if (eventType == "presence") {
+                    synchronized(peer.presence) {
+                        peer.presence.add(pnPresenceEventResult)
+                    }
+                }
+
             }
         })
     }
