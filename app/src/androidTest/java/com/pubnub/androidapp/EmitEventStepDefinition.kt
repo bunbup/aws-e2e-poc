@@ -9,7 +9,7 @@ class EmitEventStepDefinition(
     val testMessages: TestMessages
 ) {
 
-    @When("__{peerId} emits test {eventType}")
+    @When("{peerId} emits test {eventType}")
     fun emitSignal(peerId: String, eventType: String) {
         val peer = peers.peers[peerId]
         val event = "${eventType}-${UUID.randomUUID()}"

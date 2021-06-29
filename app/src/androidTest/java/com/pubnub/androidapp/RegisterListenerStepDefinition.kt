@@ -9,7 +9,7 @@ import io.cucumber.java.en.Given
 
 class RegisterListenerStepDefinition(val peers: Peers) {
 
-    @Given("__{peerId} registers listener for {eventType}")
+    @Given("{peerId} registers listener for {eventType}")
     fun registerListenerForSignals(peerId: String, eventType: String){
         val peer = peers.peers[peerId]
         peer?.pubnub?.addListener(object : SubscribeCallback() {

@@ -9,7 +9,7 @@ import java.time.Duration
 class ReceivedEventStepDefinition(val peers: Peers,
                                   val testMessages: TestMessages) {
 
-    @Then("__{peerId} received test {eventType}")
+    @Then("{peerId} received test {eventType}")
     fun receiveEvent(peerId: String, eventType: String) {
         val peer = peers.peers[peerId]
         assertThat(testMessages.messages[eventType], Matchers.not(Matchers.isEmptyOrNullString()))

@@ -7,7 +7,7 @@ import java.util.*
 
 class CreatePubNubInstanceStepDefinition(val peers: Peers) {
 
-    @And("__I create PubNub instance for {peerId}")
+    @And("I create PubNub instance for {peerId}")
     fun I_create_PubNub_instance_for_PeerA(peerId: String) {
         peers.peers[peerId] = Peer(pubnub = PubNub(PNConfiguration().apply {
             publishKey = BuildConfig.PUBNUB_PUB_KEY
