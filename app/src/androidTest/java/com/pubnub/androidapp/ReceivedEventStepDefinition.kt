@@ -35,7 +35,7 @@ class ReceivedEventStepDefinition(
     @Then("{peerId} is notified that {peerId} has joined test channel")
     fun userHasJoinedEvent(peerAId: String, peerBId: String) {
         val peer = peers.peers[peerAId]
-        
+
         Awaitility.await()
             .atMost(Duration.ofSeconds(10))
             .untilAsserted {
