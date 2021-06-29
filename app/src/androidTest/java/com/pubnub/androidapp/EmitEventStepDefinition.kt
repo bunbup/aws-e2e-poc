@@ -22,6 +22,10 @@ class EmitEventStepDefinition(
                 channel = testChannel.testChannel,
                 message = testMessages.messages[eventType]!!
             )?.sync()
+            "message" -> peer?.pubnub?.publish(
+                channel = testChannel.testChannel,
+                message = testMessages.messages[eventType]!!
+            )?.sync()
         }
     }
 }
