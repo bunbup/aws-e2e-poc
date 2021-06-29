@@ -1,13 +1,13 @@
 package com.pubnub.androidapp
 
-import com.pubnub.api.PNConfiguration
+import com.pubnub.androidapp.state.Peers
 import com.pubnub.api.PubNub
 import com.pubnub.api.callbacks.SubscribeCallback
 import com.pubnub.api.models.consumer.PNStatus
 import com.pubnub.api.models.consumer.pubsub.PNSignalResult
 import io.cucumber.java.en.Given
 
-class RegisterListenerStepDefinition(val peers: Peers) {
+class RegisterListenerStepDefinition(private val peers: Peers) {
 
     @Given("{peerId} registers listener for {eventType}s")
     fun registerListenerForSignals(peerId: String, eventType: String){

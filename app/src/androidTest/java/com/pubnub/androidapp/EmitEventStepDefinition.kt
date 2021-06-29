@@ -1,21 +1,27 @@
 package com.pubnub.androidapp
 
+import com.pubnub.androidapp.state.Peers
+import com.pubnub.androidapp.state.TestChannel
+import com.pubnub.androidapp.state.TestMessages
 import io.cucumber.java.en.When
-import java.util.*
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers
 
 class EmitEventStepDefinition(
-    val peers: Peers,
-    val testChannel: TestChannel,
-    val testMessages: TestMessages
+    private val peers: Peers,
+    private val testChannel: TestChannel,
+    private val testMessages: TestMessages
 ) {
 
     @When("{peerId} emits test {eventType}")
-    fun emitSignal(peerId: String, eventType: String) {
+    fun emitEvent(peerId: String, eventType: String) {
         val peer = peers.peers[peerId]
-        val event = "${eventType}-${UUID.randomUUID()}"
-        testMessages.messages[eventType] = event
+        assertThat(testMessages.messages[eventType], Matchers.not(Matchers.isEmptyOrNullString()))
         when (eventType) {
-            "signal" -> peer?.pubnub?.signal(channel = testChannel.testChannel, message = event)?.sync()
+            "signal" -> peer?.pubnub?.signal(
+                channel = testChannel.testChannel,
+                message = testMessages.messages[eventType]!!
+            )?.sync()
         }
     }
 }
