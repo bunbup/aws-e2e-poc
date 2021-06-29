@@ -15,7 +15,7 @@ class ReceivedEventStepDefinition(val peers: Peers,
         assertThat(testMessages.messages[eventType], Matchers.not(Matchers.isEmptyOrNullString()))
 
         Awaitility.await()
-            .atMost(Duration.ofSeconds(15))
+            .atMost(Duration.ofSeconds(60))
             .untilAsserted {
                 synchronized(peer!!.events) {
                     assertThat(peer.events[eventType], Matchers.containsInAnyOrder(testMessages.messages[eventType]))

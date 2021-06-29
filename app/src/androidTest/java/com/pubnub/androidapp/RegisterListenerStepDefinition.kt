@@ -14,7 +14,11 @@ class RegisterListenerStepDefinition(val peers: Peers) {
         val peer = peers.peers[peerId]
         peer?.pubnub?.addListener(object : SubscribeCallback() {
             override fun status(pubnub: PubNub, pnStatus: PNStatus) {
-
+                synchronized(peer.events) {
+                    peer.events.putIfAbsent("status", mutableListOf())
+                    val list = peer.events["status"]
+                    list?.add(pnStatus.category.name)
+                }
             }
 
             override fun signal(pubnub: PubNub, pnSignalResult: PNSignalResult) {
