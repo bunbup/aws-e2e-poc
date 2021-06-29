@@ -19,7 +19,7 @@ import java.time.Duration
 import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
-class PublishSubscribeSteps  {
+class PublishSubscribeSteps(val whatever: Whatever)  {
     private val pubKey = BuildConfig.PUBNUB_PUB_KEY
     private val subKey = BuildConfig.PUBNUB_SUB_KEY
     private val peerAPubnub by lazy {

@@ -35,5 +35,20 @@ class TypeRegistryConfiguration : TypeRegistryConfigurer {
                 String::class.java,
                 Transformer<String?> { text -> text})
         )
+        typeRegistry.defineParameterType(
+            ParameterType<String>(
+                "eventType",
+                "(\\S+)",
+                String::class.java,
+                Transformer<String?> { text -> text})
+        )
+        typeRegistry.defineParameterType(
+            ParameterType<String>(
+                "thingType",
+                "(\\S+)",
+                String::class.java,
+                Transformer<String?> { text -> text})
+        )
+
     }
 }
