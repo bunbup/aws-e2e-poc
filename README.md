@@ -24,3 +24,5 @@ gpg --symmetric --cipher-algo AES256 <file>
 ## scripts
 
 Initially for scripting I decided to check kotlin script instead of bash. The `./scripts/src/main/kotlin/Script.kt` together with the `./scripts/build.gradle` is the only script I've created
+
+

@@ -49,7 +49,14 @@ dependencies {
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
+    androidTestImplementation('org.awaitility:awaitility:4.1.0') {
+        exclude group: 'org.hamcrest', module: 'hamcrest'
+    }
     implementation 'io.cucumber:cucumber-android:4.8.4'
+    androidTestImplementation "io.cucumber:cucumber-picocontainer:6.10.4"
+    androidTestImplementation('org.awaitility:awaitility:4.1.0') {
+        exclude group: 'org.hamcrest', module: 'hamcrest'
+    }
 }
 
 
